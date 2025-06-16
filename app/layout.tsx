@@ -27,7 +27,7 @@ export default function RootLayout({
           <GridBackground>
             <ScrollToTop />
             <Navigation />
-            <main className="relative min-h-screen flex flex-col items-center pt-16">{children}</main>
+            <main className="relative min-h-screen flex flex-col pt-16">{children}</main>
           </GridBackground>
         </ThemeProvider>
       </body>
