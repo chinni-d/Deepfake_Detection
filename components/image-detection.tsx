@@ -9,9 +9,10 @@ import { Progress } from "@/components/ui/progress"
 import { Upload, ImageIcon, CheckCircle, XCircle, Loader2 } from "lucide-react"
 
 type DetectionResult = {
-  isDeepfake: boolean
-  confidence: number
+  isDeepfake?: boolean
+  confidence?: number
   details: string
+  error?: boolean
 }
 
 export function ImageDetection() {
@@ -48,36 +49,59 @@ export function ImageDetection() {
 
     setIsAnalyzing(true)
     setProgress(0)
+    setResult(null)
 
-    // Simulate analysis progress
-    const interval = setInterval(() => {
+    const progressInterval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 90) {
-          clearInterval(interval)
+          clearInterval(progressInterval)
           return 90
         }
         return prev + 10
       })
-    }, 200)
+    }, 500)
 
-    // Simulate API call
-    setTimeout(() => {
-      clearInterval(interval)
-      setProgress(100)
+    const formData = new FormData()
+    formData.append("file", file)
 
-      // Mock result - in real app, this would come from your API
-      const mockResult: DetectionResult = {
-        isDeepfake: Math.random() > 0.5,
-        confidence: Math.floor(Math.random() * 30) + 70, // 70-99%
-        details:
-          Math.random() > 0.5
-            ? "Analysis detected inconsistencies in facial features and lighting patterns typical of AI-generated content."
-            : "Image appears to be authentic with consistent lighting, shadows, and natural facial features.",
+    try {
+      const response = await fetch("https://deepfake-backend-api-fjdjczh9cagkesex.centralindia-01.azurewebsites.net/predict", {
+        method: "POST",
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || `Server error: ${response.statusText}`)
       }
 
-      setResult(mockResult)
+      const isDeepfake = data.prediction === "deepfake"
+      const confidence = parseFloat(data.confidence_percentage)
+
+      setResult({
+        isDeepfake,
+        confidence,
+        details: `The model is ${confidence}% confident that this image is ${
+          isDeepfake ? "a deepfake" : "authentic"
+        }.`,
+        error: false,
+      })
+    } catch (error) {
+      console.error("Error analyzing image:", error)
+      setResult({
+        confidence: 0,
+        details:
+          error instanceof Error
+            ? error.message
+            : "An unknown error occurred. Please try again.",
+        error: true,
+      })
+    } finally {
+      clearInterval(progressInterval)
+      setProgress(100)
       setIsAnalyzing(false)
-    }, 2500)
+    }
   }
 
   const reset = () => {
@@ -132,7 +156,7 @@ export function ImageDetection() {
                       <img src={preview || "/placeholder.svg"} alt="Preview" className="w-full h-64 object-contain" />
                     </div>
                     <p className="text-sm text-muted-foreground mt-2">
-                      {file?.name} ({(file?.size || 0 / 1024 / 1024).toFixed(2)} MB)
+                      {file?.name} ({((file?.size || 0) / (1024 * 1024)).toFixed(2)} MB)
                     </p>
                   </div>
 
@@ -160,23 +184,36 @@ export function ImageDetection() {
                       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                         <div
                           className={`p-4 rounded-lg border-2 ${
-                            result.isDeepfake
+                            result.error || result.isDeepfake
                               ? "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20"
                               : "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20"
                           }`}
                         >
-                          <div className="flex items-center space-x-2 mb-2">
-                            {result.isDeepfake ? (
-                              <XCircle className="h-5 w-5 text-red-600" />
-                            ) : (
-                              <CheckCircle className="h-5 w-5 text-green-600" />
-                            )}
-                            <span className="font-semibold">
-                              {result.isDeepfake ? "DEEPFAKE DETECTED" : "AUTHENTIC"}
-                            </span>
-                          </div>
-                          <p className="text-sm mb-2">Confidence: {result.confidence}%</p>
-                          <p className="text-sm text-muted-foreground">{result.details}</p>
+                          {result.error ? (
+                            <>
+                              <div className="flex items-center space-x-2 mb-2">
+                                <XCircle className="h-5 w-5 text-red-600" />
+                                <span className="font-semibold">ANALYSIS ERROR</span>
+                              </div>
+                              <p className="text-sm mb-2">Confidence: {result.confidence}%</p>
+                              <p className="text-sm text-muted-foreground">{result.details}</p>
+                            </>
+                          ) : (
+                            <>
+                              <div className="flex items-center space-x-2 mb-2">
+                                {result.isDeepfake ? (
+                                  <XCircle className="h-5 w-5 text-red-600" />
+                                ) : (
+                                  <CheckCircle className="h-5 w-5 text-green-600" />
+                                )}
+                                <span className="font-semibold">
+                                  {result.isDeepfake ? "DEEPFAKE DETECTED" : "AUTHENTIC"}
+                                </span>
+                              </div>
+                              <p className="text-sm mb-2">Confidence: {result.confidence}%</p>
+                              <p className="text-sm text-muted-foreground">{result.details}</p>
+                            </>
+                          )}
                         </div>
 
                         <Button onClick={reset} variant="outline" className="w-full">

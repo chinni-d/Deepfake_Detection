@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Navigation } from "@/components/navigation"
 import { GridBackground } from "@/components/grid-background"
 import { ScrollToTop } from "@/components/scroll-to-top"
+import { ClerkProvider } from "@clerk/nextjs"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -21,6 +22,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
+    <ClerkProvider>
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
@@ -32,5 +34,6 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
     </html>
+    </ClerkProvider>
   )
 }

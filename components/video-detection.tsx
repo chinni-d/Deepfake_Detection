@@ -9,13 +9,10 @@ import { Progress } from "@/components/ui/progress"
 import { Upload, Video, CheckCircle, XCircle, Loader2 } from "lucide-react"
 
 type DetectionResult = {
-  isDeepfake: boolean
-  confidence: number
+  isDeepfake?: boolean
+  confidence?: number
   details: string
-  frameAnalysis: {
-    totalFrames: number
-    suspiciousFrames: number
-  }
+  error?: boolean
 }
 
 export function VideoDetection() {
@@ -49,43 +46,48 @@ export function VideoDetection() {
 
     setIsAnalyzing(true)
     setProgress(0)
+    setResult(null)
 
-    // Simulate analysis progress
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 85) {
-          clearInterval(interval)
-          return 85
-        }
-        return prev + 5
+    const formData = new FormData()
+    formData.append("file", file)
+
+    try {
+      const response = await fetch("https://deepfake-backend-api-fjdjczh9cagkesex.centralindia-01.azurewebsites.net/predict", {
+        method: "POST",
+        body: formData,
       })
-    }, 300)
 
-    // Simulate API call (longer for video)
-    setTimeout(() => {
-      clearInterval(interval)
-      setProgress(100)
+      const data = await response.json()
 
-      // Mock result - in real app, this would come from your API
-      const totalFrames = Math.floor(Math.random() * 500) + 100
-      const suspiciousFrames = Math.floor(Math.random() * totalFrames * 0.3)
-
-      const mockResult: DetectionResult = {
-        isDeepfake: suspiciousFrames > totalFrames * 0.15,
-        confidence: Math.floor(Math.random() * 25) + 75, // 75-99%
-        details:
-          suspiciousFrames > totalFrames * 0.15
-            ? "Video analysis detected temporal inconsistencies and facial artifacts across multiple frames, indicating potential deepfake manipulation."
-            : "Video appears authentic with consistent temporal flow, natural facial movements, and coherent lighting throughout.",
-        frameAnalysis: {
-          totalFrames,
-          suspiciousFrames,
-        },
+      if (!response.ok) {
+        throw new Error(data.error || `Server error: ${response.statusText}`)
       }
 
-      setResult(mockResult)
+      const isDeepfake = data.prediction === "deepfake"
+      const confidence = parseFloat(data.confidence_percentage)
+
+      setResult({
+        isDeepfake,
+        confidence,
+        details: `The model is ${confidence}% confident that this video is ${
+          isDeepfake ? "a deepfake" : "authentic"
+        }.`,
+        error: false,
+      })
+    } catch (error) {
+      console.error("Error analyzing video:", error)
+      setResult({
+        confidence: 0,
+        details:
+          error instanceof Error
+            ? error.message
+            : "An unknown error occurred. Please try again.",
+        error: true,
+      })
+    } finally {
+      setProgress(100)
       setIsAnalyzing(false)
-    }, 4000)
+    }
   }
 
   const reset = () => {
@@ -171,35 +173,36 @@ export function VideoDetection() {
                       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
                         <div
                           className={`p-4 rounded-lg border-2 ${
-                            result.isDeepfake
+                            result.error || result.isDeepfake
                               ? "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20"
                               : "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20"
                           }`}
                         >
-                          <div className="flex items-center space-x-2 mb-2">
-                            {result.isDeepfake ? (
-                              <XCircle className="h-5 w-5 text-red-600" />
-                            ) : (
-                              <CheckCircle className="h-5 w-5 text-green-600" />
-                            )}
-                            <span className="font-semibold">
-                              {result.isDeepfake ? "DEEPFAKE DETECTED" : "AUTHENTIC"}
-                            </span>
-                          </div>
-                          <p className="text-sm mb-2">Confidence: {result.confidence}%</p>
-                          <p className="text-sm text-muted-foreground mb-3">{result.details}</p>
-                          <div className="text-xs text-muted-foreground space-y-1">
-                            <p>Total Frames: {result.frameAnalysis.totalFrames}</p>
-                            <p>Suspicious Frames: {result.frameAnalysis.suspiciousFrames}</p>
-                            <p>
-                              Anomaly Rate:{" "}
-                              {(
-                                (result.frameAnalysis.suspiciousFrames / result.frameAnalysis.totalFrames) *
-                                100
-                              ).toFixed(1)}
-                              %
-                            </p>
-                          </div>
+                          {result.error ? (
+                            <>
+                              <div className="flex items-center space-x-2 mb-2">
+                                <XCircle className="h-5 w-5 text-red-600" />
+                                <span className="font-semibold">ANALYSIS ERROR</span>
+                              </div>
+                              <p className="text-sm mb-2">Confidence: {result.confidence}%</p>
+                              <p className="text-sm text-muted-foreground">{result.details}</p>
+                            </>
+                          ) : (
+                            <>
+                              <div className="flex items-center space-x-2 mb-2">
+                                {result.isDeepfake ? (
+                                  <XCircle className="h-5 w-5 text-red-600" />
+                                ) : (
+                                  <CheckCircle className="h-5 w-5 text-green-600" />
+                                )}
+                                <span className="font-semibold">
+                                  {result.isDeepfake ? "DEEPFAKE DETECTED" : "AUTHENTIC"}
+                                </span>
+                              </div>
+                              <p className="text-sm mb-2">Confidence: {result.confidence}%</p>
+                              <p className="text-sm text-muted-foreground">{result.details}</p>
+                            </>
+                          )}
                         </div>
 
                         <Button onClick={reset} variant="outline" className="w-full">

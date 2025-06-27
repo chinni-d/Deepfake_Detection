@@ -8,6 +8,7 @@ import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs"
 
 const navItems = [
   { name: "Home", href: "/" },
@@ -173,7 +174,7 @@ export function Navigation() {
           </div>
 
           {/* Right Aligned: Theme Toggle */}
-          <div className="flex items-center">
+          <div className="flex items-center space-x-2">
             <Button
               variant="ghost"
               size="icon"
@@ -184,6 +185,18 @@ export function Navigation() {
               <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
               <span className="sr-only">Toggle theme</span>
             </Button>
+            
+            <SignedOut>
+              <SignInButton mode="modal">
+                <Button variant="outline" size="sm">
+              Sign In
+            </Button>
+              </SignInButton>
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+
           </div>
         </div>
       </div>
