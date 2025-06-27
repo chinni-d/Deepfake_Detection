@@ -1,5 +1,4 @@
 "use client"
-import { motion } from "framer-motion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ImageDetection } from "@/components/image-detection"
 import { VideoDetection } from "@/components/video-detection"
@@ -10,12 +9,7 @@ export default function DetectPage() {
     <div className="min-h-screen flex flex-col w-full">
       <div className="flex-1 w-full">
         <div className="container mx-auto px-4 py-8 sm:py-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="mx-auto max-w-4xl"
-          >
+          <div className="mx-auto max-w-4xl">
             <div className="text-center mb-8 sm:mb-12">
               <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">Deepfake Detection</h1>
               <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto px-4 sm:px-0">
@@ -25,24 +19,31 @@ export default function DetectPage() {
             </div>
 
             <Tabs defaultValue="image" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6 sm:mb-8">
-                <TabsTrigger value="image" className="text-sm sm:text-base">
+              <TabsList className="grid h-auto w-full grid-cols-2 rounded-lg bg-muted p-1.5">
+                <TabsTrigger
+                  value="image"
+                  className="rounded-md text-sm data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm sm:text-base"
+                >
                   Image Detection
                 </TabsTrigger>
-                <TabsTrigger value="video" className="text-sm sm:text-base">
+                <TabsTrigger
+                  value="video"
+                  className="rounded-md text-sm data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm sm:text-base"
+                >
                   Video Detection
                 </TabsTrigger>
               </TabsList>
+              <div className="mt-6 sm:mt-8">
+                <TabsContent value="image">
+                  <ImageDetection />
+                </TabsContent>
 
-              <TabsContent value="image">
-                <ImageDetection />
-              </TabsContent>
-
-              <TabsContent value="video">
-                <VideoDetection />
-              </TabsContent>
+                <TabsContent value="video">
+                  <VideoDetection />
+                </TabsContent>
+              </div>
             </Tabs>
-          </motion.div>
+          </div>
         </div>
       </div>
       <Footer />

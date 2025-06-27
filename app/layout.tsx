@@ -10,7 +10,7 @@ import { ScrollToTop } from "@/components/scroll-to-top"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "DeepDetect - Professional Deepfake Detection",
+  title: "DeepDetect",
   description: "Identify AI-generated videos and images with confidence using advanced deepfake detection technology.",
     generator: 'v0.dev'
 }
