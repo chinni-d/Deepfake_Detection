@@ -243,35 +243,6 @@ export default function AboutPage() {
 
             {/* Developer Team */}
             <DeveloperTeam />
-
-            {/* Resources */}
-            <section>
-              <Card className="border-0 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
-                <CardHeader className="text-center">
-                  <CardTitle className="text-2xl">Learn More</CardTitle>
-                </CardHeader>
-                <CardContent className="text-center space-y-6">
-                  <p className="text-muted-foreground max-w-2xl mx-auto">
-                    Explore additional resources to deepen your understanding of deepfake technology and detection
-                    methods.
-                  </p>
-                  <div className="flex flex-wrap justify-center gap-4">
-                    <Button variant="outline" className="group">
-                      <ExternalLink className="mr-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                      Research Papers
-                    </Button>
-                    <Button variant="outline" className="group">
-                      <ExternalLink className="mr-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                      GitHub Repository
-                    </Button>
-                    <Button variant="outline" className="group">
-                      <ExternalLink className="mr-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                      Technical Documentation
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </section>
           </motion.div>
         </div>
       </div>

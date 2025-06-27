@@ -66,7 +66,7 @@ const features = [
 export function FeaturesSection() {
 	return (
 		<section className="py-16 sm:py-20 lg:py-24 relative w-full">
-			<div className="container mx-auto px-4">
+			<div className="mx-auto max-w-7xl px-4">
 				<div className="mx-auto max-w-2xl text-center mb-12 sm:mb-16">
 					<motion.h2
 						initial={{ opacity: 0, y: 20 }}
