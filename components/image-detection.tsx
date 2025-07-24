@@ -65,7 +65,7 @@ export function ImageDetection() {
     formData.append("file", file)
 
     try {
-      const response = await fetch("https://deepfake-backend-api-fjdjczh9cagkesex.centralindia-01.azurewebsites.net/predict", {
+      const response = await fetch("https://deepfake-backend-ezcvdteybagrgybx.centralindia-01.azurewebsites.net/predict", {
         method: "POST",
         body: formData,
       })
